@@ -12,6 +12,7 @@ typedef struct card_s {
     struct card_s* pt, * previous;
 } card;
 
+void swapCard(card deck []);
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
 void printHand(card* h);
@@ -93,4 +94,25 @@ void deleteCard(card** h, card** t, int cardChoice) {
         (p->pt)->previous = p->previous;
     }
     free(p);
+}
+void swapCard(card deck []){
+    card temp;
+    int i;
+    int j;
+    
+    i = rand() % 108;
+    j = rand() % 108;
+    
+    
+    if (i != j) {
+        strcpy(temp.color, deck[i].color);
+        temp.value = deck[i].value;
+        strcpy(temp.action, deck[i].action);
+        strcpy(deck[i].color, deck[j].color);
+        deck[i].value = deck[j].value;
+        strcpy(deck[i].action, deck[j].action);
+        strcpy(deck[j].color, temp.color);
+        deck[j].value = temp.value;
+        strcpy(deck[j].action, temp.action);
+    }
 }
