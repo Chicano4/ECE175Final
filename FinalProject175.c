@@ -12,6 +12,7 @@ typedef struct card_s {
     struct card_s* pt, *previous;
 } card;
 
+int pointCounter(card **h, card**p, int hand);
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
 void printHand(card* h);
@@ -115,6 +116,15 @@ int main(void) {
         numDoubleColorMatches = 0;
     // if a player cannot make a match they draw a card and if they still cannot play a card, they add one to the center
     // play one card onto hashtags
+        if (p1Head == NULL){
+        printf("Player 1 wins with %d points",points1);
+    }
+    if (p2Head == NULL){
+        printf("Player 2 wins with %d points",points2);
+    }
+    else {
+        printf("no winner ran out of cards :----");
+    }
     }
     return 0;
 }
@@ -338,6 +348,28 @@ void playerToCenterCard(card** centerh, card** playerh, card** centert, card** p
         deleteCard(playerh, playert, cardPos);
     }
 }
-
+int pointCounter(card **h, card**p, int hand){
+    card *temp;
+    int cardValue;
+    int total = 0;
+    temp = *h;
+    for (int i = 0; i < hand; i++) {
+        cardValue = (*h)->value;
+        if (cardValue != 2 || cardValue != 11) {
+            cardValue = cardValue + cardValue;
+        }
+         if (cardValue == 2 || cardValue == 11){
+             if (cardValue == 2){
+                 cardValue = cardValue + 20;
+             }
+             if (cardValue == 11){
+                 cardValue = cardValue + 40;
+             }
+        }
+        temp = temp->pt;
+        total = total + cardValue;
+    }
+    return total;
+}
 
 
