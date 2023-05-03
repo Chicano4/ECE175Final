@@ -15,19 +15,20 @@ typedef struct card_s {
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
 void printHand(card* h);
-void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTail, int *turns);
+void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTail, int *turns, int *singleMatches, int *doubleMatches);
 void swapCard(card deck[]);
 bool checkWith1Card(card* center, card* player);
 bool checkWith2Cards(card* center, card* player1, card* player2);
 int addToCenterRow(card* centerh);
 bool checkColorwithOneCard(card p, card c);
 bool checkColorwithTwoCards(card p1, card p2, card c);
+void playerToCenterCard(card** centerh, card** playerh, card** centert, card** playert, int times);
 
 int main(void) {
     FILE* inp = fopen("CardDeck.txt", "r");
     card deck[108];
     int i,a, currentCardPosition = 0, checkShuffle;
-    int points1 = 0, points2 = 0, turns = 0;
+    int points1 = 0, points2 = 0, turns = 0, numSingleColorMatches = 0, numDoubleColorMatches = 0;
     int* points1Pointer = &points1, * points2Pointer = &points2;
     card *p1Head = NULL, *p1Tail = NULL, *p2Head = NULL, *p2Tail = NULL, *centerHead = NULL, *centerTail = NULL;
     while (!feof(inp)) {
@@ -56,11 +57,12 @@ int main(void) {
     addCard(&centerHead, &centerTail, deck[currentCardPosition]);
     currentCardPosition++;
     //deleteCard(&centerHead, &centerTail, 2);
-    while(p1Head != NULL && p2Head != NULL && currentCardPosition < 108){
+    while(p1Head != NULL || p2Head != NULL || currentCardPosition < 108){
+        //P1 Turn
         printf("Player 1's Hand: ");
         printHand(p1Head);
         printHand(centerHead); 
-        turn(&centerHead, &p1Head, centerTail, p1Tail, &turns);
+        turn(&centerHead, &p1Head, centerTail, p1Tail, &turns, &numSingleColorMatches, &numDoubleColorMatches);
         printf("turns = %d\n", turns);
         printHand(p1Head);
         if (turns == 0) {
@@ -69,7 +71,12 @@ int main(void) {
             printf("Player 1's Hand: ");
             printHand(p1Head);
             printHand(centerHead);
-            turn(&centerHead, &p1Head, centerTail, p1Tail, &turns);
+            turn(&centerHead, &p1Head, centerTail, p1Tail, &turns, &numSingleColorMatches, &numDoubleColorMatches);
+        }
+        playerToCenterCard(&centerHead, &p1Head, &centerTail, &p1Tail, numSingleColorMatches);
+        for (a = 0; a < numDoubleColorMatches;a++) {
+            addCard(&p2Head, &p2Tail, deck[currentCardPosition]);
+            currentCardPosition++;
         }
         for (a = 0; a < addToCenterRow(centerHead); a++) {
             addCard(&centerHead, &centerTail, deck[currentCardPosition]);
@@ -77,11 +84,14 @@ int main(void) {
         }
         printf("here\n");
         turns = 0;
+        numSingleColorMatches = 0;
+        numDoubleColorMatches = 0;
         
+        //P2 turn begins
         printf("Player 2's Hand: ");
         printHand(p2Head);
         printHand(centerHead);
-        turn(&centerHead, &p2Head, centerTail, p2Tail, &turns);
+        turn(&centerHead, &p2Head, centerTail, p2Tail, &turns, &numSingleColorMatches, &numDoubleColorMatches);
         printf("turns = %d", turns);
         if (turns == 0) {
             addCard(&p2Head, &p2Tail, deck[currentCardPosition]);
@@ -89,13 +99,20 @@ int main(void) {
             printf("Player 2's Hand: ");
             printHand(p2Head);
             printHand(centerHead);
-            turn(&centerHead, &p2Head, centerTail, p2Tail, &turns);
+            turn(&centerHead, &p2Head, centerTail, p2Tail, &turns, &numSingleColorMatches, &numDoubleColorMatches);
+        }
+        playerToCenterCard(&centerHead, &p2Head, &centerTail, &p2Tail, numSingleColorMatches);
+        for (a = 0; a < numDoubleColorMatches;a++) {
+            addCard(&p1Head, &p1Tail, deck[currentCardPosition]);
+            currentCardPosition++;
         }
         for (a = 0; a < addToCenterRow(centerHead, centerTail); a++) {
             addCard(&centerHead, &centerTail, deck[currentCardPosition]);
             currentCardPosition++;
         }
         turns = 0;
+        numSingleColorMatches = 0;
+        numDoubleColorMatches = 0;
     // if a player cannot make a match they draw a card and if they still cannot play a card, they add one to the center
     // play one card onto hashtags
     }
@@ -154,7 +171,7 @@ void deleteCard(card** h, card** t, int cardChoice) {
     }
     free(p);
 }
-void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTail, int *turns) {// color matches with 2 card; player gets to put a card in thecenter and all other players must draw from the pile. 1 color match player just gets to play in the middle
+void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTail, int *turns, int *singleMatches, int *doubleMatches) {// color matches with 2 card; player gets to put a card in thecenter and all other players must draw from the pile. 1 color match player just gets to play in the middle
     int numberCardsToPlay, cardPosition,i,j,k,centerCardPosition = 1, cardPosition2 = 1, centerToPlay = 1;
     card* tempCenter = *centerHead;
     card* tempPlayer;
@@ -191,6 +208,9 @@ void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTa
                
                 printf("%d\n", tempPlayer->value);
                 if (checkWith1Card(tempCenter, tempPlayer) || tempCenter->value == 11) {
+                    if (checkColorwithOneCard(*tempPlayer,*tempCenter)) {
+                        *singleMatches = *singleMatches + 1;
+                    }
                     deleteCard(playerHead, &playerTail, cardPosition);
                     deleteCard(centerHead, &centerTail, centerCardPosition);
                     centerCardPosition--;
@@ -213,6 +233,9 @@ void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTa
                     tempPlayer2 = tempPlayer2->pt;
                 }
                 if (checkWith2Cards(tempCenter, tempPlayer, tempPlayer2)) {
+                    if (checkColorwithTwoCards(*tempPlayer, *tempPlayer2, *tempCenter)) {
+                        *doubleMatches = *doubleMatches + 1;
+                    }
                     deleteCard(playerHead, &playerTail, cardPosition);
                     deleteCard(playerHead, &playerTail, cardPosition2 - 1);
                     deleteCard(centerHead, &centerTail, centerCardPosition);
@@ -299,4 +322,22 @@ bool checkColorwithTwoCards(card p1, card p2, card c) {
         return false;
     }
 }
+void playerToCenterCard(card** centerh, card** playerh, card** centert, card** playert, int times) {
+    int cardPos,i,j;
+    card* temp;
+    temp = *playerh;
+    for (i = 0;i < times;i++) {
+        printf("Which card would u like to add to the center?");
+        printHand(*playerh, *playert);
+        scanf("%d", &cardPos);
+        for (j = 1; j < cardPos;j++) {
+            temp = temp->pt;
+        }
+        printf("%d\n", temp->value);
+        addCard(centerh, centert, *temp);
+        deleteCard(playerh, playert, cardPos);
+    }
+}
+
+
 
