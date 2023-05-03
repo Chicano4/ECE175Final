@@ -12,6 +12,10 @@ typedef struct card_s {
     struct card_s* pt, * previous;
 } card;
 
+bool checkColorwithOneCard(card p, card c);
+bool checkWithTwoCards(card p1, card p2, card c);
+bool checkColorwithOneCard(card p, card c);
+bool checkColorwithTwoCards(card p1, card p2, card c);
 void swapCard(card deck []);
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
@@ -114,5 +118,40 @@ void swapCard(card deck []){
         strcpy(deck[j].color, temp.color);
         deck[j].value = temp.value;
         strcpy(deck[j].action, temp.action);
+    }
+}
+bool checkWithOneCard(card p, card c, int *points){
+  //  if (p.color == c.color) {
+  //      *points = *points + 20;
+  //  }
+    if (p.value == c.value) {
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+bool checkWithTwoCards(card p1, card p2, card c) {
+    if ((p1.value == c.value) && (p2.value == c.value)){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+bool checkColorwithOneCard(card p, card c){
+    if (strcmp(p.color, c.color) == 0){
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+bool checkColorwithTwoCards(card p1, card p2, card c){
+    if ((strcmp(p1.color, c.color) == 0) && (strcmp(p2.color, c.color) == 0)){
+        return true;
+    }
+    else {
+        return false;
     }
 }
