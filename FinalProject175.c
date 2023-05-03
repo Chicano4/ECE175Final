@@ -12,7 +12,6 @@ typedef struct card_s {
     struct card_s* pt, *previous;
 } card;
 
-int pointCounter(card **h, card**p, int hand);
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
 void printHand(card* h);
@@ -24,13 +23,14 @@ int addToCenterRow(card* centerh);
 bool checkColorwithOneCard(card p, card c);
 bool checkColorwithTwoCards(card p1, card p2, card c);
 void playerToCenterCard(card** centerh, card** playerh, card** centert, card** playert, int times);
+int pointCounter(card** h, card** p, int hand);
 
 int main(void) {
     FILE* inp = fopen("CardDeck.txt", "r");
     card deck[108];
     int i,a, currentCardPosition = 0, checkShuffle;
     int points1 = 0, points2 = 0, turns = 0, numSingleColorMatches = 0, numDoubleColorMatches = 0;
-    int* points1Pointer = &points1, * points2Pointer = &points2;
+    //int* points1Pointer = &points1, * points2Pointer = &points2;
     card *p1Head = NULL, *p1Tail = NULL, *p2Head = NULL, *p2Tail = NULL, *centerHead = NULL, *centerTail = NULL;
     while (!feof(inp)) {
         for (i = 0; i < 108;i++) {
@@ -78,7 +78,9 @@ int main(void) {
         for (a = 0; a < numDoubleColorMatches;a++) {
             addCard(&p2Head, &p2Tail, deck[currentCardPosition]);
             currentCardPosition++;
+            points1 += 40;
         }
+        points1 += numSingleColorMatches * 20;
         for (a = 0; a < addToCenterRow(centerHead); a++) {
             addCard(&centerHead, &centerTail, deck[currentCardPosition]);
             currentCardPosition++;
@@ -106,7 +108,9 @@ int main(void) {
         for (a = 0; a < numDoubleColorMatches;a++) {
             addCard(&p1Head, &p1Tail, deck[currentCardPosition]);
             currentCardPosition++;
+            points2 += 40;
         }
+        points2 += numSingleColorMatches * 20;
         for (a = 0; a < addToCenterRow(centerHead, centerTail); a++) {
             addCard(&centerHead, &centerTail, deck[currentCardPosition]);
             currentCardPosition++;
@@ -116,15 +120,15 @@ int main(void) {
         numDoubleColorMatches = 0;
     // if a player cannot make a match they draw a card and if they still cannot play a card, they add one to the center
     // play one card onto hashtags
-        if (p1Head == NULL){
-        printf("Player 1 wins with %d points",points1);
     }
-    if (p2Head == NULL){
-        printf("Player 2 wins with %d points",points2);
+    if (p1Head == NULL) {
+        printf("Player 1 wins with %d points", points1);
+    }
+    if (p2Head == NULL) {
+        printf("Player 2 wins with %d points", points2);
     }
     else {
         printf("no winner ran out of cards :----");
-    }
     }
     return 0;
 }
@@ -338,7 +342,7 @@ void playerToCenterCard(card** centerh, card** playerh, card** centert, card** p
     temp = *playerh;
     for (i = 0;i < times;i++) {
         printf("Which card would u like to add to the center?");
-        printHand(*playerh, *playert);
+        printHand(*playerh);
         scanf("%d", &cardPos);
         for (j = 1; j < cardPos;j++) {
             temp = temp->pt;
@@ -348,8 +352,8 @@ void playerToCenterCard(card** centerh, card** playerh, card** centert, card** p
         deleteCard(playerh, playert, cardPos);
     }
 }
-int pointCounter(card **h, card**p, int hand){
-    card *temp;
+int pointCounter(card** h, card** p, int hand) {
+    card* temp;
     int cardValue;
     int total = 0;
     temp = *h;
@@ -358,18 +362,19 @@ int pointCounter(card **h, card**p, int hand){
         if (cardValue != 2 || cardValue != 11) {
             cardValue = cardValue + cardValue;
         }
-         if (cardValue == 2 || cardValue == 11){
-             if (cardValue == 2){
-                 cardValue = cardValue + 20;
-             }
-             if (cardValue == 11){
-                 cardValue = cardValue + 40;
-             }
+        if (cardValue == 2 || cardValue == 11) {
+            if (cardValue == 2) {
+                cardValue = cardValue + 20;
+            }
+            if (cardValue == 11) {
+                cardValue = cardValue + 40;
+            }
         }
         temp = temp->pt;
         total = total + cardValue;
     }
     return total;
 }
+
 
 
