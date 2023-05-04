@@ -12,6 +12,7 @@ typedef struct card_s {
     struct card_s* pt, *previous;
 } card;
 
+void shuffleDeck(card deck[]);
 void addCard(card** h, card** t, card s);
 void deleteCard(card** h, card** t, int cardChoice);
 void printHand(card* h);
@@ -44,7 +45,7 @@ int main(void) {
     scanf("%d", &checkShuffle);
     if (checkShuffle == 1) {
         for (int shuffle = 0; shuffle < 1000; shuffle++) {
-            swapCard(deck);
+            shuffleDeck(deck);
         }
     }
     for (int k = 0;k < 7;k++) {
@@ -128,7 +129,7 @@ int main(void) {
         printf("Player 2 wins with %d points", points2);
     }
     else {
-        printf("no winner ran out of cards :----");
+        printf("no winner ran out of cards");
     }
     return 0;
 }
@@ -263,6 +264,7 @@ void turn(card **centerHead, card **playerHead, card *centerTail, card *playerTa
     }
     //printHand(*centerHead);
 }
+/*
 void swapCard(card deck[]) {
     card temp;
     int i;
@@ -286,6 +288,7 @@ void swapCard(card deck[]) {
         strcpy(deck[j].action, temp.action);
     }
 }
+*/
 bool checkWith1Card(card* center, card* player) {
     if (center->value == player->value) {
         return true;
@@ -375,6 +378,22 @@ int pointCounter(card** h, card** p, int hand) {
     }
     return total;
 }
+void shuffleDeck(card deck[]){
+    card temp;
+    int i,j;
+    srand(time(NULL));
 
+  for (i = 107; i > 0; i--) {
+    
+    j = rand() % (i + 1);
+
+      if (i != j){
+          temp = deck[i];
+          deck[i] = deck[j];
+          deck[j] = temp;
+      }
+    
+  }
+}
 
 
